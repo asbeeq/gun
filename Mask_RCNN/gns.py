@@ -79,11 +79,11 @@ class gnsDataset(utils.Dataset):
         subset: Subset to load: train or val
         """
         # Add classes. We have two classes to add.
-        self.add_class("gns", 1, "pistol")
-        self.add_class("gns", 2, "rifle")
+        self.add_class("gns", 1, "whitepistol")
+        self.add_class("gns", 2, "blackpistol")
         
         
-        self.class_name_to_ids = {'pistol':1,'rifle':2}
+        self.class_name_to_ids = {'whitepistol':1,'blackpistol':2}
         # Train or validation dataset?
         assert subset in ["train", "val"]
         dataset_dir = os.path.join(dataset_dir, subset)
