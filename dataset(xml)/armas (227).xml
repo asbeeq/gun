@@ -1,0 +1,26 @@
+<annotation>
+	<folder>dataset</folder>
+	<filename>armas (227).jpg</filename>
+	<path>C:\Users\islyambek.kairov\Documents\www\gun\dataset\armas (227).jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>254</width>
+		<height>198</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>gun</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>130</xmin>
+			<ymin>109</ymin>
+			<xmax>250</xmax>
+			<ymax>186</ymax>
+		</bndbox>
+	</object>
+</annotation>
