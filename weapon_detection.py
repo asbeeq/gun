@@ -2,7 +2,7 @@ import cv2
 import random as rhashcode
 import numpy as np
 
-
+dir_path = 'data/'
 image_path = ''
 
 
@@ -13,7 +13,8 @@ format_input = input()
 form = 'image'  # дефолтное значение
 if format_input == '1':
     print('Выбрано Изображение')
-    image_path = input('Выберите путь до изображения. Например: "data/input.jpg"\nПуть: ')
+    image_path = input('Выберите изображение. Например: "input.jpg"\nПуть: ')
+    image_path = dir_path + image_path
 elif format_input == '2':
     form = 'video'
     print('Выбрано Видео')
