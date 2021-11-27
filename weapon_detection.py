@@ -1,10 +1,28 @@
 import cv2
 import random as rhashcode
 import numpy as np
+import tkinter as tk
 
 dir_path = 'data/'
 image_path = ''
 
+# tkiner begining --------------------------
+window = tk.Tk()
+window.title("Определения оружия")
+window.geometry('600x400+200+100')
+window['bg'] = 'gray'
+
+label = tk.Label(text="Определение оружия (временно не работает, смотреть через консоль)", fg="white", bg="gray", width=100, height=5)
+btn_1 = tk.Button(text="Изображение", fg="white", bg="black", width=20, height=5)
+btn_2 = tk.Button(text="Видео", fg="white", bg="black", width=20, height=5)
+btn_3 = tk.Button(text="Камера", fg="white", bg="black", width=20, height=5)
+
+label.pack()
+btn_1.pack()
+btn_2.pack()
+btn_3.pack()
+window.mainloop()
+# end of tkinter --------------------------
 
 # консоль интерфейс
 print('Определение оружия')
@@ -25,32 +43,29 @@ elif format_input == '2':
 elif format_input == '3':
     form = 'camera'
     print('Выбрано Камера')
-    exit()
+    data = cv2.VideoCapture(0)
 else:
     print('Выбрана не верная форма')
     exit()
 
 
+net = cv2.dnn.readNet("yolov3_training_2000.weights", "yolov3_testing.cfg")
 
+# hashvalue = rhashcode.randint(6*10, 9*10)
+key_name = "Weapon"  # + str(hashvalue)
+classes = [key_name]
+
+layer_names = net.getLayerNames()
+output_layers = [layer_names[i[0] - 1] for i in net.getUnconnectedOutLayers()]
+colors = np.random.uniform(0, 255, size=(len(classes), 3))
+
+
+# fi - format_input
 def process(fi, data):
     if fi == '1':
         img = data
     else:
         _, img = data.read()
-
-    net = cv2.dnn.readNet("yolov3_training_2000.weights", "yolov3_testing.cfg")
-
-    # hashvalue = rhashcode.randint(6*10, 9*10)
-    key_name = "Weapon"  # + str(hashvalue)
-    classes = [key_name]
-
-    layer_names = net.getLayerNames()
-    output_layers = [layer_names[i[0] - 1] for i in net.getUnconnectedOutLayers()]
-    colors = np.random.uniform(0, 255, size=(len(classes), 3))
-
-    
-    img = cv2.resize(img, None, fx=0.4, fy=0.4)
-
 
     height, width, channels = img.shape
 
@@ -111,5 +126,7 @@ while True:
     if key == 27:
         break
 
-cap.release()
+
+# release VideoCapture data
+data.release()
 cv2.destroyAllWindows()
