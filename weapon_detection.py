@@ -8,181 +8,196 @@ dir_path = 'data/'
 image_path = ''
 format_input = '0'
 
-
-# tkiner begining --------------------------
-def create_window(title="Определения оружия"):
-    window = tk.Tk()
-    window.title(title)
-    window.geometry('600x400+200+100')
-    window['bg'] = 'gray'
-    return window
-
-def helperFunc(form):
-    window.destroy()
-    w = create_window(form)
-
-    # helper function
-    def browsefunc():
-        global image_path, video_path, format_input
-        filename = filedialog.askopenfilename(filetypes=(("jpg files","*.jpg"), ("mp4 files","*.mp4"),("All files","*.*")))
-        ent1.insert(tk.END, filename)
-        if form == 'image':
-            image_path = filename.split('/')[-1] # get last element, on windows delimiter may be different
-            print(image_path)
-            format_input = '1'
-        elif form == 'video':
-            video_path = filename.split('/')[-1] # get last element, on windows delimiter may be different
-            print(video_path)
-            format_input = '2'
-    
-    def startFunc():
-        w.destroy()
-
-    ent1=tk.Entry(w, font=20, width=50)
-    ent1.pack()
-    tk.Label(bg='gray').pack()
-    b1=tk.Button(w, text="Найти файл", font=40, width=20, height=1, command=browsefunc)
-    b1.pack()
-    b2=tk.Button(w, text="Обработать", font=40, width=20, height=1, command=startFunc)
-    b2.pack()
-
-def do_image():
-    print('image')
-    helperFunc('image')
-
-def do_video():
-    print('video')
-    helperFunc('video')
-
-def do_camera():
-    print('camera')
-    window.destroy()
-    # w = create_window("camera")
-    global format_input
-    format_input = '3'
-
-
-window = create_window()
-label = tk.Label(text="Определение оружия", fg="white", bg="gray", width=100, height=5)
-btn_1 = tk.Button(text="Изображение", fg="white", bg="black", width=20, height=5, command=do_image)
-btn_2 = tk.Button(text="Видео", fg="white", bg="black", width=20, height=5, command=do_video)
-btn_3 = tk.Button(text="Камера", fg="white", bg="black", width=20, height=5, command=do_camera)
-
-label.pack()
-btn_1.pack()
-btn_2.pack()
-btn_3.pack()
-window.mainloop()
-
-# end of tkinter --------------------------
-
-
-# exit()  # todo remove
-
-# консоль интерфейс
-# print('Определение оружия')
-# print('Выберите формат: \n1 - Изображение\n2 - Видео\n3 - Камера')
-# format_input = input()
-
-form = 'image'  # дефолтное значение
-if format_input == '1':
-    print('Выбрано Изображение')
-    # image_path = input('Выберите изображение. Например: "input.jpg"\nПуть: ')
-    image_path = dir_path + image_path
-    data = cv2.imread(image_path)
-elif format_input == '2':
-    form = 'video'
-    print('Выбрано Видео')
-    # video_path = input('Выберите видео. Например: "input.mv4"\nПуть: ')
-    video_path = dir_path + video_path
-    data = cv2.VideoCapture(video_path)
-elif format_input == '3':
-    form = 'camera'
-    print('Выбрано Камера')
-    data = cv2.VideoCapture(0)
-else:
-    print('Выбрана не верная форма')
-    exit()
-
-
-net = cv2.dnn.readNet("yolov3_training_2000.weights", "yolov3_testing.cfg")
-
-# hashvalue = rhashcode.randint(6*10, 9*10)
-key_name = "Weapon"  # + str(hashvalue)
-classes = [key_name]
-
-layer_names = net.getLayerNames()
-output_layers = [layer_names[i[0] - 1] for i in net.getUnconnectedOutLayers()]
-colors = np.random.uniform(0, 255, size=(len(classes), 3))
-
-
-# fi - format_input
-def process(fi, data):
-    if fi == '1':
-        img = data
-    else:
-        _, img = data.read()
-
-    height, width, channels = img.shape
-
-    # определение объекта
-    blob = cv2.dnn.blobFromImage(img, 0.00392, (416, 416), (0, 0, 0), True, crop=False)
-
-    net.setInput(blob)
-    outs = net.forward(output_layers)
-
-    # вывод на экран
-    class_ids = []
-    confidences = []
-    boxes = []
-    for out in outs:
-        for detection in out:
-            scores = detection[5:]
-            class_id = np.argmax(scores)
-            confidence = scores[class_id]
-            if confidence > 0.5:
-                # объект определен
-                center_x = int(detection[0] * width)
-                center_y = int(detection[1] * height)
-                w = int(detection[2] * width)
-                h = int(detection[3] * height)
-
-                # координаты четырехугольника
-                x = int(center_x - w / 2)
-                y = int(center_y - h / 2)
-
-                boxes.append([x, y, w, h])
-                confidences.append(float(confidence))
-                class_ids.append(class_id)
-
-    indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
-    print(indexes)
-    if indexes == 0: print("объект определен на фрейме")
-    font = cv2.FONT_HERSHEY_PLAIN
-    for i in range(len(boxes)):
-        if i in indexes:
-            x, y, w, h = boxes[i]
-            label = str(classes[class_ids[i]])
-            color = colors[class_ids[i]]
-            cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
-            cv2.putText(img, label, (x, y + 30), font, 2, color, 3)
-    
-    return img
-
-
-if format_input == '1':
-    img = process(format_input, data)
-
-
 while True:
-    if format_input != '1':
+    # tkiner begining --------------------------
+    def create_window(title="Определения оружия"):
+        window = tk.Tk()
+        window.title(title)
+        window.geometry('600x400+200+100')
+        window['bg'] = 'gray'
+        return window
+
+    def helperFunc(form):
+        window.destroy()
+        w = create_window(form)
+
+        # helper function
+        def browsefunc():
+            global image_path, video_path, format_input
+            filename = filedialog.askopenfilename(filetypes=(("jpg files","*.jpg"), ("mp4 files","*.mp4"),("All files","*.*")))
+            ent1.insert(tk.END, filename)
+            if form == 'image':
+                image_path = filename.split('/')[-1] # get last element, on windows delimiter may be different
+                print(image_path)
+                format_input = '1'
+            elif form == 'video':
+                video_path = filename.split('/')[-1] # get last element, on windows delimiter may be different
+                print(video_path)
+                format_input = '2'
+        
+        def startFunc():
+            w.destroy()
+
+        ent1=tk.Entry(w, font=20, width=50)
+        ent1.pack()
+        tk.Label(bg='gray').pack()
+        b1=tk.Button(w, text="Найти файл", font=40, width=20, height=1, command=browsefunc)
+        b1.pack()
+        b2=tk.Button(w, text="Обработать", font=40, width=20, height=1, command=startFunc)
+        b2.pack()
+
+    def do_image():
+        print('image')
+        helperFunc('image')
+
+    def do_video():
+        print('video')
+        helperFunc('video')
+
+    def do_camera():
+        print('camera')
+        window.destroy()
+        # w = create_window("camera")
+        global format_input
+        format_input = '3'
+
+
+    window = ''
+    def start_main():
+        global window
+        window = create_window()
+        label = tk.Label(text="Определение оружия", fg="white", bg="gray", width=100, height=5)
+        btn_1 = tk.Button(text="Изображение", fg="white", bg="black", width=20, height=5, command=do_image)
+        btn_2 = tk.Button(text="Видео", fg="white", bg="black", width=20, height=5, command=do_video)
+        btn_3 = tk.Button(text="Камера", fg="white", bg="black", width=20, height=5, command=do_camera)
+
+        label.pack()
+        btn_1.pack()
+        btn_2.pack()
+        btn_3.pack()
+        window.mainloop()
+
+    start_main()
+
+    # end of tkinter --------------------------
+
+
+    # exit()  # todo remove
+
+    # консоль интерфейс
+    # print('Определение оружия')
+    # print('Выберите формат: \n1 - Изображение\n2 - Видео\n3 - Камера')
+    # format_input = input()
+
+    form = 'image'  # дефолтное значение
+    if format_input == '1':
+        print('Выбрано Изображение')
+        # image_path = input('Выберите изображение. Например: "input.jpg"\nПуть: ')
+        image_path = dir_path + image_path
+        data = cv2.imread(image_path)
+    elif format_input == '2':
+        form = 'video'
+        print('Выбрано Видео')
+        # video_path = input('Выберите видео. Например: "input.mv4"\nПуть: ')
+        video_path = dir_path + video_path
+        data = cv2.VideoCapture(video_path)
+    elif format_input == '3':
+        form = 'camera'
+        print('Выбрано Камера')
+        data = cv2.VideoCapture(0)
+    else:
+        print('Выбрана не верная форма')
+        exit()
+
+
+    net = cv2.dnn.readNet("yolov3_training_2000.weights", "yolov3_testing.cfg")
+
+    # hashvalue = rhashcode.randint(6*10, 9*10)
+    key_name = "Weapon"  # + str(hashvalue)
+    classes = [key_name]
+
+    layer_names = net.getLayerNames()
+    output_layers = [layer_names[i[0] - 1] for i in net.getUnconnectedOutLayers()]
+    colors = np.random.uniform(0, 255, size=(len(classes), 3))
+
+
+    # fi - format_input
+    def process(fi, data):
+        if fi == '1':
+            img = data
+            
+            # resize
+            scale_percent = 40 # percent of original size
+            width = int(img.shape[1] * scale_percent / 100)
+            height = int(img.shape[0] * scale_percent / 100)
+            dim = (width, height)
+            img = cv2.resize(img, dim, cv2.INTER_AREA)
+        else:
+            _, img = data.read()
+
+        height, width, channels = img.shape
+
+        # определение объекта
+        blob = cv2.dnn.blobFromImage(img, 0.00392, (416, 416), (0, 0, 0), True, crop=False)
+
+        net.setInput(blob)
+        outs = net.forward(output_layers)
+
+        # вывод на экран
+        class_ids = []
+        confidences = []
+        boxes = []
+        for out in outs:
+            for detection in out:
+                scores = detection[5:]
+                class_id = np.argmax(scores)
+                confidence = scores[class_id]
+                if confidence > 0.5:
+                    # объект определен
+                    center_x = int(detection[0] * width)
+                    center_y = int(detection[1] * height)
+                    w = int(detection[2] * width)
+                    h = int(detection[3] * height)
+
+                    # координаты четырехугольника
+                    x = int(center_x - w / 2)
+                    y = int(center_y - h / 2)
+
+                    boxes.append([x, y, w, h])
+                    confidences.append(float(confidence))
+                    class_ids.append(class_id)
+
+        indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
+        print(indexes)
+        if indexes == 0: print("объект определен на фрейме")
+        font = cv2.FONT_HERSHEY_PLAIN
+        for i in range(len(boxes)):
+            if i in indexes:
+                x, y, w, h = boxes[i]
+                label = str(classes[class_ids[i]])
+                color = colors[class_ids[i]]
+                cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
+                cv2.putText(img, label, (x, y + 30), font, 2, color, 3)
+        
+        return img
+
+
+    if format_input == '1':
         img = process(format_input, data)
-    cv2.imshow("Изображение:", img)
-    key = cv2.waitKey(1)
-    if key == 27:
-        break
 
 
-# release VideoCapture data
-data.release()
-cv2.destroyAllWindows()
+    while True:
+        if format_input != '1':
+            img = process(format_input, data)
+
+        cv2.imshow("Изображение:", img)
+        key = cv2.waitKey(1)
+        if key == 27:
+            break
+
+
+
+    # release VideoCapture data
+    # if format_input != '1':
+    #     img.release()
+    cv2.destroyAllWindows()
