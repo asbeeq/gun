@@ -13,6 +13,7 @@ Weapon detection image format
 Запуск:
 1. python weapon_detection.py
 2. Следовать инструкции по консоли
+3. Необходимо создать директорию data. И положить внутри изображение, видео
 
 Open source contributers:
 - Islyambek Kairov
